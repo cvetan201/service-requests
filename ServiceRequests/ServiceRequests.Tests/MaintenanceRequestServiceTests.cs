@@ -1,6 +1,5 @@
-using MaintenanceRequests.Models;
+using MaintenanceRequests.Dtos;
 using MaintenanceRequests.Services;
-using System;
 using Xunit;
 
 namespace ServiceRequests.Tests
@@ -17,32 +16,34 @@ namespace ServiceRequests.Tests
         }
 
         [Fact]
-        public void Test2DeleteMainteanceRequestById_CheckIfElementIsDeleted_ReturnsTrue()
+        public void Test2DeleteMaintenanceRequestById_CheckIfElementIsDeleted_ReturnsTrue()
         {
             var requests = _maintenanceRequestService.GetAllMaintenanceRequests();
-            var result = _maintenanceRequestService.DeleteMainteanceRequestById(requests[0].Id);
+            var idOfDeletedElement = requests[0].Id;
 
-            Assert.True(requests != null && result.Count == 0, "Deleting the first element then we should have 0 elements."); ;
+            _maintenanceRequestService.DeleteMaintenanceRequestById(idOfDeletedElement);
+
+            var doesElementExists = _maintenanceRequestService.GetMaintenanceRequestById(idOfDeletedElement) != null;
+
+            Assert.False(doesElementExists, "Element should not exist after beeing deleted."); ;
         }
 
         [Fact]
         public void Test3CreateNewMaitenanceRequest_CheckIfElementIsAdded_ReturnsTrue()
         {
-            var request = new MaintenanceRequest
+            var numberOfElementsBeforeAddingNew = _maintenanceRequestService.GetAllMaintenanceRequests().Count;
+
+            var addrequest = new AddMaintenanceRequestDto
             {
-                Id = new Guid(),
                 BuildingCode = "COH",
                 Description = "Please turn up the AC in suite 1200D. It is too hot here.",
-                CurrentStatus = ServiceStatus.Created,
-                CreatedBy = "Nik Patel",
-                CreatedDate = DateTime.Now,
-                LastModifiedBy = "Jane Doe",
-                LastModifiedDate = DateTime.Now
+                CreatedBy = "Nik Patel"
             };
 
-            var requests = _maintenanceRequestService.CreateNewMaitenanceRequest(request);
+            var numberOfElementsAfterAddingNew = _maintenanceRequestService.CreateNewMaintenanceRequest(addrequest).Count;
 
-            Assert.True(requests != null && requests.Count == 2, "Adding one more element now we should have 2 elements."); ;
+            Assert.True(numberOfElementsBeforeAddingNew < numberOfElementsAfterAddingNew, 
+                "Number or elements should increase after we add new element"); ;
         }
     }
 }

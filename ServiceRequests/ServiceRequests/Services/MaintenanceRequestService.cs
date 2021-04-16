@@ -1,4 +1,5 @@
-﻿using MaintenanceRequests.Models;
+﻿using MaintenanceRequests.Dtos;
+using MaintenanceRequests.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace MaintenanceRequests.Services
         private static List<MaintenanceRequest> requests = new List<MaintenanceRequest>
         {
             new MaintenanceRequest{
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 BuildingCode ="COH",
                 Description="Please turn up the AC in suite 1200D. It is too hot here.",
                 CurrentStatus = ServiceStatus.Created,
@@ -19,22 +20,44 @@ namespace MaintenanceRequests.Services
                 CreatedDate = DateTime.Now,
                 LastModifiedBy = "Jane Doe",
                 LastModifiedDate = DateTime.Now
-            }
+            },
+             new MaintenanceRequest{
+                Id = Guid.NewGuid(),
+                BuildingCode ="COH",
+                Description="Please change the lamp in the kitchen.",
+                CurrentStatus = ServiceStatus.Created,
+                CreatedBy ="Cvetan Kostadinov",
+                CreatedDate = DateTime.Now,
+                LastModifiedBy = "Peter Smith",
+                LastModifiedDate = DateTime.Now
+            },
         };
 
-        public IList<MaintenanceRequest> CreateNewMaitenanceRequest(MaintenanceRequest request)
+        public IList<MaintenanceRequest> CreateNewMaintenanceRequest(AddMaintenanceRequestDto addrequest)
         {
+            var request = new MaintenanceRequest
+            {
+                Id = Guid.NewGuid(),
+                BuildingCode = addrequest.BuildingCode,
+                Description = addrequest.Description,
+                CurrentStatus = ServiceStatus.Created,
+                CreatedBy = addrequest.CreatedBy,
+                CreatedDate = DateTime.Now,
+                LastModifiedBy = addrequest.CreatedBy,
+                LastModifiedDate = DateTime.Now
+            };
+
             requests.Add(request);
             return requests;
         }
 
-        public IList<MaintenanceRequest> DeleteMainteanceRequestById(Guid id)
+        public IList<MaintenanceRequest> DeleteMaintenanceRequestById(Guid id)
         {
             requests.RemoveAll(x => x.Id == id);
             return requests;
         }
 
-        public MaintenanceRequest GetMainteanceRequestById(Guid id)
+        public MaintenanceRequest GetMaintenanceRequestById(Guid id)
         {
             return requests.FirstOrDefault(x => x.Id == id);
         }
@@ -44,8 +67,13 @@ namespace MaintenanceRequests.Services
             return requests;
         }
 
-        public IList<MaintenanceRequest> UpdateMaitenanceRequest(MaintenanceRequest request)
+        public IList<MaintenanceRequest> UpdateMaintenanceRequest(UpdateMaintenanceRequestDto updateRequest)
         {
+            var request = requests.First(x => x.Id == updateRequest.Id);
+            request.CurrentStatus = updateRequest.CurrentStatus;
+            request.LastModifiedBy = updateRequest.LastModifiedBy;
+            request.LastModifiedDate = DateTime.Now;
+
             return requests.Where(x => x.Id == request.Id)
                 .Select(y => { y = request; return y; })
                 .ToList();
